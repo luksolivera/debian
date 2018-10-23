@@ -1,9 +1,11 @@
 #include <stdio.h>
-#include <pthread.h>
+#include <omp.h>
 #include <time.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <sys/time.h>
+
+#define MAX_NUM_THREADS	16
 
 //int size; /*tamaño del vector*/
 int numWorkers; /*numero de workers*/
@@ -14,7 +16,6 @@ pthread_mutex_t lock;
 
 char array[786432];
 //char mensaje[2000];
-void * worker (void * ptr);
 double timeval_diff(struct timeval *a, struct timeval *b);
 
 typedef struct bmpFileHeader
@@ -107,28 +108,10 @@ void DisplayInfo(bmpInfoHeader *info)
 }
 
 
-
-/*-----------  Carga de bytes modificados-----------*/
-unsigned char *EditImage(bmpInfoHeader *info, unsigned char *img,int *array[]){
-unsigned char *img2;
-int i,j=0;
-
-img2=img;
-for(i=0; i<info->imgsize; i=i+3){
-	array[j]=img2[i];
-	j++;
-}
-
-return img2;
-}
-
-
 bmpInfoHeader info;
 unsigned char *img;
 unsigned char *img2;
 bmpFileHeader fileHeader;
-pthread_t workers[MAX_NUM_WORKERS];
-
 /*--------------  MAIN  -----------------------------*/
 void main(int argc,char* argv[]){
 /*	Comenzamos a medir el tiempo*/
@@ -139,82 +122,54 @@ void main(int argc,char* argv[]){
 /*----- Leemos la imagen y asignamos la array*/
 	img=LoadBMP("paisaje.bmp", &info, &fileHeader);
 	
-	
-   	int i, ids[MAX_NUM_WORKERS];
-	pthread_attr_t attr;
-	
-	pthread_attr_init(&attr);
-	pthread_mutex_init(&lock,NULL);
+	unsigned char mens;
+   	int i, turno;
 	/*Lee parámetros de la línea de comando*/
 	numWorkers = atoi(argv[1]);
-	numWorkers = (numWorkers < MAX_NUM_WORKERS ? numWorkers : MAX_NUM_WORKERS);
+	numWorkers = (numWorkers < MAX_NUM_THREADS ? numWorkers : MAX_NUM_THREADS);
 	stripSize = info.imgsize/ numWorkers;
 	/* crea los hilos */
-	for (i = 0; i < numWorkers; i++) {
-		ids[i] = i;
-		pthread_create(&workers[i], &attr, worker, &ids[i]);
-	}
-	/*Espera a que los hilos terminen*/
-	for (i = 0; i < numWorkers; i++)
-		pthread_join(workers[i], NULL);
+	i=0;
+	#pragma omp parallel shared(i,img,array,stripSize,mens) num_threads(numWorkers)
+
+{
+	int id = i++;
+	int j=0,k=0,first,last;
+	unsigned char mensaje[sizeof(array)];
+	/*Determina la primera y ultima posición del bloque a procesar*/
+	first = id*stripSize;
+	last = first + stripSize - 1;
 	
-	printf("%d \n",array);
+	for (j = first; j <= last; j=j+3){
+		if((img[j] >= 65 && img[j] <= 90) ||
+		(img[j] >= 97 && img[j] <= 122) ||
+		(img[j] >= 160 && img[j] <= 163)|| 
+		img[j]==32)
+		//if(img[i] >=48 && img[i] <=164)
+		{
+			mensaje[k]=img[j];
+			k++;
+		}
+		
+	}
+		
+		#pragma omp critical
+		for (j = 0; j <= sizeof(mensaje); j++){
+			if(mensaje[j] >= 65 && mensaje[j] <= 90 || 
+			mensaje[j] >= 97 && mensaje[j] <= 122||
+			mensaje[j] >= 160 && mensaje[j] <= 163||
+			mensaje[j]==32)
+				printf("%c",mensaje[j]);
+		}
+		
+} 
+	
 	/*Detiene el contador de tiempo*/
 	gettimeofday(&t_fin, NULL);
 	secs = timeval_diff(&t_fin, &t_ini);
 	/*-------------------------------*/
-  	DisplayInfo(&info);
-
 }
 
-
-void * worker (void *arg) {
-	int *ptr_id = (int*) arg;
-	int id = *ptr_id;
-	int local_sum, i, first, last;
-	unsigned char mensaje[sizeof(array)];
-
-	/*Determina la primera y ultima posición del bloque a procesar*/
-	first = id*stripSize;
-	last = first + stripSize - 1;
-	printf("Primer bloque %d ,%d \n",first,id);
-	printf("ultimo bloque %d ,%d \n",last,id);
-	
-	int j= 0;
-	for (i = first; i <= last; i=i+3){
-		if((img[i] >= 65 && img[i] <= 90) || (img[i] >= 97 && img[i] <= 122) ||(img[i] >= 160 && img[i] <= 163)|| img[i]==32)
-		//if(img[i] >=48 && img[i] <=164)
-		{
-			mensaje[j]=img[i];
-			
-			
-		}
-		j++;
-	}
-	
-	if(id==0)
-		printf("\n----------ESCRIBE EL HILO = %d ----------------\n",id);
-		for (i = 0; i <= sizeof(mensaje); i++)
-			if(mensaje[i] >= 65 && mensaje[i] <= 90 || mensaje[i] >= 97 && mensaje[i] <= 122||mensaje[i] >= 160 && mensaje[i] <= 163|| mensaje[i]==32)
-				printf("%c",mensaje[i]);
-	else{
-		pthread_join(workers[id-1],NULL);
-		printf("\n\n----------ESCRIBE EL HILO = %d ----------------\n\n",id);
-		for (i = 0; i <= sizeof(mensaje); i++)
-			if(mensaje[i] >= 65 && mensaje[i] <= 90 || mensaje[i] >= 97 && mensaje[i] <= 122||mensaje[i] >= 160 && mensaje[i] <= 163|| mensaje[i]==32)
-				printf("%c",mensaje[i]);
-	}
-		
-		
-	/*pthread_mutex_lock(&lock);
-	for (i = first; i <= last; i=i+3){
-		array[i]=mensaje[j];
-		j++;
-	}
-	pthread_mutex_unlock(&lock);*/
-	pthread_exit (0);
-
-}
 
 /*función para medir el tiempo retorna "a -b" en segundos*/
 double timeval_diff(struct timeval *a, struct timeval *b)
@@ -223,5 +178,4 @@ double timeval_diff(struct timeval *a, struct timeval *b)
 	  (double)(a->tv_sec + (double)a->tv_usec/1000000) -
 	  (double)(b->tv_sec + (double)b->tv_usec/1000000);
 }
-
 
