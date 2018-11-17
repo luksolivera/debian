@@ -1,0 +1,10 @@
+//
+// login.idl
+//
+module login {
+	interface inicio_sesion {
+		boolean logear(in string user, in string pass);
+		boolean registrar(in string user, in string pass);
+	};
+};
+
