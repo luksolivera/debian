@@ -10,6 +10,7 @@ import org.omg.CosNaming.NamingContextPackage.*;
 // Importamos otras clases necesarias de Java
 import java.io.*;
 import java.util.*;
+import java.util.Scanner;
 public class Cliente{
 
 	private static LoginImplementacion h;
@@ -32,7 +33,7 @@ public static void main (String args[ ]) {
 		org.omg.CORBA.Object objRef= orb.resolve_initial_references("NameService");
 		NamingContextExt ncRef= NamingContextExtHelper.narrow(objRef);
 		h= new LoginImplementacion(); 
-		Scanner s= new Scanner();
+		Scanner s= new Scanner(System.in);
 		boolean e=true;
 		while(e){
 			System.out.println("1- REGISTRO\n");
