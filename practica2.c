@@ -173,13 +173,11 @@ void * worker (void *arg) {
 	int id = *ptr_id;
 	int local_sum, i, first, last;
 	unsigned char mensaje[sizeof(array)];
-
 	/*Determina la primera y ultima posición del bloque a procesar*/
 	first = id*stripSize;
 	last = first + stripSize - 1;
 	printf("Primer bloque %d ,%d \n",first,id);
 	printf("ultimo bloque %d ,%d \n",last,id);
-	
 	int j= 0;
 	for (i = first; i <= last; i=i+3){
 		if((img[i] >= 65 && img[i] <= 90) || (img[i] >= 97 && img[i] <= 122) ||(img[i] >= 160 && img[i] <= 163)|| img[i]==32)
@@ -191,7 +189,6 @@ void * worker (void *arg) {
 		}
 		j++;
 	}
-	
 	if(id==0)
 		printf("\n----------ESCRIBE EL HILO = %d ----------------\n",id);
 		for (i = 0; i <= sizeof(mensaje); i++)
@@ -204,14 +201,6 @@ void * worker (void *arg) {
 			if(mensaje[i] >= 65 && mensaje[i] <= 90 || mensaje[i] >= 97 && mensaje[i] <= 122||mensaje[i] >= 160 && mensaje[i] <= 163|| mensaje[i]==32)
 				printf("%c",mensaje[i]);
 	}
-		
-		
-	/*pthread_mutex_lock(&lock);
-	for (i = first; i <= last; i=i+3){
-		array[i]=mensaje[j];
-		j++;
-	}
-	pthread_mutex_unlock(&lock);*/
 	pthread_exit (0);
 
 }
