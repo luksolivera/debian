@@ -45,15 +45,15 @@ public static void main (String args[ ]) {
 				case 1:
 					System.out.println("REGISTRO\n");
 					System.out.println("Ingrese ID\n");
-					String id = nextLine();
+					String id = s.nextLine();
 					System.out.println("Ingrese Dominio\n");
-					String dom = nextLine();
+					String dom = s.nextLine();
 					System.out.println("Ingrese contraseña\n");
-					String pass= nextLine();
+					String pass= s.nextLine();
 					System.out.println("Repita contraseña\n");
 					String rpass= nextLine();
 					id= id + "@" +dom;
-					if (pass.Equals(rpass)){
+					if (pass.equals(rpass)){
 						h.registrar(id,pass);
 						System.out.println("Usuario Registrado Correctamente\n");
 					} 
@@ -64,9 +64,9 @@ public static void main (String args[ ]) {
 				case 2:
 					System.out.println("LOGIN\n");
 					System.out.println("Ingrese usuario\n");
-					String id = nextLine();
+					String id = s.nextLine();
 					System.out.println("Ingrese contraseña\n");
-					String pass= nextLine();
+					String pass= s.nextLine();
 					if(h.logear(id,pass))
 						System.out.println("ACCESO CONCEDIDO: BIENVENIDO " +id+ " \n");
 					else
