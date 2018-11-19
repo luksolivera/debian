@@ -81,8 +81,9 @@ public static void main (String args[ ]) {
 		//out.println(ref);
 		//out.flush();
 		//file.close();
-		org.omg.CORBA.Object objRef= orb.resolve_initial_references("login.ref");
-		NamingContextExt h= NamingContextExtHelper.narrow(objRef);
+		org.omg.CORBA.Object objRef= orb.resolve_initial_references("NameService");
+		NamingContextExt ncRef= NamingContextExtHelper.narrow(objRef);
+		LoginImplementacion h= new LoginImplementacion(); 
 
 		// ESPERAMOS INVOCACIONES DE LOS CLIENTES
 		System.out.println("Servidor listo y a la espera de conexiones ...\n");
