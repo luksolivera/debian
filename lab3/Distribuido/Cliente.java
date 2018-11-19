@@ -10,11 +10,7 @@ import org.omg.CosNaming.NamingContextPackage.*;
 // Importamos otras clases necesarias de Java
 import java.io.*;
 import java.util.*;
-import javax.swing.*;
-import javax.swing.event.*;
-import java.awt.event.*;
-import java.awt.*;
-public class Cliente extends JFrame implements ChangeListener,ActionListener{
+public class Cliente{
 
 	private static LoginImplementacion h;
 
@@ -37,23 +33,25 @@ public static void main (String args[ ]) {
 		NamingContextExt ncRef= NamingContextExtHelper.narrow(objRef);
 		h= new LoginImplementacion(); 
 		Scanner s= new Scanner();
-		while(1){
+		boolean e=true;
+		while(e){
 			System.out.println("1- REGISTRO\n");
 			System.out.println("2- LOGIN\n");
 			int x = s.nextInt();
+			String id,dom,pass,rpass;
 			switch (x){
 				case 1:
 					System.out.println("REGISTRO\n");
 					System.out.println("Ingrese ID\n");
-					String id = nextLine();
+					id =s.nextLine();
 					System.out.println("Ingrese Dominio\n");
-					String dom = nextLine();
+					dom = s.nextLine();
 					System.out.println("Ingrese contraseña\n");
-					String pass= nextLine();
+					pass= s.nextLine();
 					System.out.println("Repita contraseña\n");
-					String rpass= nextLine();
+					rpass= s.nextLine();
 					id= id + "@" +dom;
-					if (pass.Equals(rpass)){
+					if (pass.equals(rpass)){
 						h.registrar(id,pass);
 						System.out.println("Usuario Registrado Correctamente\n");
 					} 
@@ -64,14 +62,16 @@ public static void main (String args[ ]) {
 				case 2:
 					System.out.println("LOGIN\n");
 					System.out.println("Ingrese usuario\n");
-					String id = nextLine();
+					id = s.nextLine();
 					System.out.println("Ingrese contraseña\n");
-					String pass= nextLine();
+					pass= s.nextLine();
 					if(h.logear(id,pass))
 						System.out.println("ACCESO CONCEDIDO: BIENVENIDO " +id+ " \n");
 					else
 						System.out.println("ACCESO DENEGADO\n");
 					break;
+				case 3:
+					e=false;break;
 				default:
 					System.out.println("error");
 			}	
