@@ -11,11 +11,133 @@ import org.omg.CosNaming.NamingContextPackage.*;
 import java.io.*;
 import java.util.*;
 import java.util.Scanner;
-public class Cliente{
+import javax.swing.*;
+import javax.swing.event.*;
+import java.awt.event.*;
+import java.awt.*;
+public class Cliente extends JFrame implements ChangeListener,ActionListener{
 
+	private JLabel title,id,dom,pass,rpass,a;
+	private JButton reg,log;
+	private JTextField name,mail, pwd, rpwd;
+	private JCheckBox check;
 	private static LoginImplementacion h;
 
+public Cliente(){
+	// ******************************************************
+	// ********* 	Creacion de Grafica *********************
+	// ******************************************************
+	setLayout(null);
+	setTitle("Objetos Distribuidos");
+	getContentPane().setBackground(new Color(255,140,178));
+	// -------------------------------------------
+	// Labels ------------------------------------
+	title = new JLabel("Login");
+	title.setBounds(150,0,200,25);
+	title.setFont(new Font("arial", 3, 24));
+	add(title);
+	id = new JLabel("ID");
+	id.setBounds(30,50,60,25);
+	id.setFont(new Font("arial", 2,16));
+	add(id);
+	dom = new JLabel("Dominio");
+	dom.setBounds(230,50,150,25);
+	dom.setFont(new Font("arial", 2, 16));
+	add(dom);
+	pass = new JLabel("Password");
+	pass.setBounds(30,110,150,25);
+	pass.setFont(new Font("arial", 2, 16));
+	add(pass);
+	rpass = new JLabel("Repetir Password");
+	rpass.setBounds(30,180,200,25);
+	rpass.setFont(new Font("arial", 2, 16));
+	add(rpass);
+	rpass.setVisible(false);
+	a = new JLabel("@");
+	a.setBounds(180,80,30,20); 
+	a.setFont(new Font("arial", 2, 16));
+	add(a);
+	// -------------------------------------------
+	// TextFields
+	name= new JTextField();
+	mail= new JTextField();
+	pwd= new JTextField();
+	rpwd= new JTextField();
+	name.setBounds(20, 80 , 150 , 20);
+	mail.setBounds(200, 80 , 150 , 20);
+	pwd.setBounds(20, 150 , 330 , 20);
+	rpwd.setBounds(20, 210 , 330 , 20);
+	add(name);
+	add(mail);
+	add(pwd);
+	add(rpwd);
+	rpwd.setVisible(false);
+	// -------------------------------------------
+	// Buttons
+	check= new JCheckBox("Soy nuevo");
+	check.setBounds(120,250,200,30);
+	check.addChangeListener(this);
+	check.setBackground(new Color(255,140,178));
+	add(check);
+	reg = new JButton("Registrarse");
+	reg.setBounds(50,300,150,30);
+	reg.setEnabled(false);
+	add(reg);
+	reg.addActionListener(this);
+	log = new JButton("Iniciar Sesion");
+	log.setBounds(200,300,150,30);
+	add(log);
+	log.addActionListener(this);
+
+}
+public void stateChanged(ChangeEvent e){
+	if(check.isSelected() == true){
+		title.setText("Registrarse");
+		rpass.setVisible(true);
+		rpwd.setVisible(true);
+		reg.setEnabled(true);
+		log.setEnabled(false);
+	}else{
+		title.setText("Login");
+		rpass.setVisible(false);
+		rpwd.setVisible(false);
+		reg.setEnabled(false);
+		log.setEnabled(true);
+	}
+}
+public void actionPerformed(ActionEvent e){
+	if (e.getSource() == reg){
+		String user= name.getText() + "@" + mail.getText();
+		String pass = pwd.getText();
+		if (pass.equals(rpwd.getText())){
+			h.registrar(user,pass);
+			JOptionPane.showMessageDialog(null,"Usuario creado correctamente","Correcto", JOptionPane.DEFAULT_OPTION);
+			}
+		else{
+			JOptionPane.showMessageDialog(null,"Las contraseñas no coinciden","Ocurrio un error", JOptionPane.ERROR_MESSAGE);
+			}
+		pwd.setText("");
+		rpwd.setText("");
+	}
+	if(e.getSource() == log){
+		String user= name.getText() + "@" + mail.getText();
+		String pass = pwd.getText();
+		boolean request= h.logear(user,pass);
+		if (request){
+			JOptionPane.showMessageDialog(null,"Usuario Logeado correctamente","Correcto", JOptionPane.DEFAULT_OPTION);
+			}
+		else{
+			JOptionPane.showMessageDialog(null,"usuario y/o contraseña incorrecto/s ","Ocurrio un error", JOptionPane.ERROR_MESSAGE);
+			}
+		pwd.setText("");
+		rpwd.setText(""); 
+	}
+}
 public static void main (String args[ ]) {
+	Cliente cl= new Cliente();
+	cl.setBounds(0,0,400,400);
+	cl.setVisible(true);
+	cl.setLocationRelativeTo(null);
 		// ******************************************************
 	// ********* 	Implemetacion de CORBA *********************
 	// ******************************************************
@@ -33,52 +155,6 @@ public static void main (String args[ ]) {
 		org.omg.CORBA.Object objRef= orb.resolve_initial_references("NameService");
 		NamingContextExt ncRef= NamingContextExtHelper.narrow(objRef);
 		h= new LoginImplementacion(); 
-		Scanner s= new Scanner(System.in);
-		boolean e=true;
-		while(e){
-			System.out.println("1- REGISTRO\n");
-			System.out.println("2- LOGIN\n");
-			int x = s.nextInt();
-			String id,dom,pass,rpass;
-			switch (x){
-				case 1:
-					System.out.println("REGISTRO\n");
-					System.out.println("Ingrese ID\n");
-					id =s.nextLine();
-					System.out.println("Ingrese Dominio\n");
-					dom = s.nextLine();
-					System.out.println("Ingrese contraseña\n");
-					pass= s.nextLine();
-					System.out.println("Repita contraseña\n");
-					rpass= s.nextLine();
-					id= id + "@" +dom;
-					if (pass.equals(rpass)){
-						h.registrar(id,pass);
-						System.out.println("Usuario Registrado Correctamente\n");
-					} 
-					else{
-						System.out.println("Las contraseña no coinciden\n");
-					}
-					break;
-				case 2:
-					System.out.println("LOGIN\n");
-					System.out.println("Ingrese usuario\n");
-					id = s.nextLine();
-					System.out.println("Ingrese contraseña\n");
-					pass= s.nextLine();
-					if(h.logear(id,pass))
-						System.out.println("ACCESO CONCEDIDO: BIENVENIDO " +id+ " \n");
-					else
-						System.out.println("ACCESO DENEGADO\n");
-					break;
-				case 3:
-					e=false;break;
-				default:
-					System.out.println("error");
-			}	
-		}
-		
-
 
 
 	}
