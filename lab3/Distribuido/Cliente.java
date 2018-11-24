@@ -1,7 +1,7 @@
 //
 // Cliente.java
 //
-package login;
+import login.*;
 // Importamos las clases de CORBA necesarias
 import org.omg.CORBA.ORB;
 import org.omg.CosNaming.*;

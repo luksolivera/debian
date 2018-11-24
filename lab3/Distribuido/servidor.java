@@ -1,7 +1,7 @@
 //
 // Servidor.java
 //
-package login;
+import login.*;
 
 // IMPORTAMOS LAS CLASES DE CORBA NECESARIAS
 import java.util.*;
