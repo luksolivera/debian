@@ -21,7 +21,7 @@ public class Cliente extends JFrame implements ChangeListener,ActionListener{
 	private JButton reg,log;
 	private JTextField name,mail, pwd, rpwd;
 	private JCheckBox check;
-	private static LoginImplementacion h;
+	private static inicio_sesion h;
 
 public Cliente(){
 	// ******************************************************
@@ -134,10 +134,7 @@ public void actionPerformed(ActionEvent e){
 	}
 }
 public static void main (String args[ ]) {
-	Cliente cl= new Cliente();
-	cl.setBounds(0,0,400,400);
-	cl.setVisible(true);
-	cl.setLocationRelativeTo(null);
+
 		// ******************************************************
 	// ********* 	Implemetacion de CORBA *********************
 	// ******************************************************
@@ -152,9 +149,14 @@ public static void main (String args[ ]) {
 
 	// CREAMOS REFERENCIA AL OBJETO REMOTO
 	//h = login.inicio_sesionHelper.narrow(orb.string_to_object(ref));
-		org.omg.CORBA.Object objRef= orb.resolve_initial_references("NameService");
-		NamingContextExt ncRef= NamingContextExtHelper.narrow(objRef);
-		h= new LoginImplementacion(); 
+	org.omg.CORBA.Object objRef= orb.resolve_initial_references("NameService");
+	NamingContextExt ncRef= NamingContextExtHelper.narrow(objRef);
+	String name = "inicio_sesion";
+	h= inicio_sesionHelper.narrow(ncRef.resolve_str(name)); 
+	Cliente cl= new Cliente();
+	cl.setBounds(0,0,400,400);
+	cl.setVisible(true);
+	cl.setLocationRelativeTo(null);
 
 
 	}
