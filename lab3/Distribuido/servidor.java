@@ -15,7 +15,10 @@ import org.omg.PortableServer.POA;
 class LoginImplementacion extends inicio_sesionPOA
 {	
 	private ArrayList<User> users= new ArrayList();
-	
+	private ORB orb;
+	public void setORB(ORB orb_val){
+		orb =orb_val;
+	}
 	public boolean logear(String user, String pass)
 	{
 		System.out.println("\nLogear \nusuario= " + user +" password= " + pass);
@@ -69,21 +72,17 @@ public static void main (String args[ ]) {
 		// CREAMOS LOS OBJETOS QUE DARAN SERVICIO
 		// Y LOS CONECTAMOS AL ORB
 		LoginImplementacion objlogin = new LoginImplementacion();
-		inicio_sesion ss = objlogin._this(orb);
-
-		// CREAMOS UNA CADENA CON LA IDENTIFICACION DEL OBJETO
-		String ref = orb.object_to_string(ss);
-
-		// VOLCAMOS LA IDENTIFICACION A UN ARCHIVO PARA
-		// PERMITIR AL CLIENTE HALLAR EL OBJETO REMOTO
-		//java.io.FileOutputStream file = new java.io.FileOutputStream("login.ref");
-		//java.io.PrintWriter out = new java.io.PrintWriter(file);
-		//out.println(ref);
-		//out.flush();
-		//file.close();
+		objlogin.setORB(orb);
+		
+		org.omg.CORBA.Object ref = rootPOA.servant_to_reference(objlogin);
+		inicio_sesion href = inicio_sesionHelper.narrow(ref);
+		
 		org.omg.CORBA.Object objRef= orb.resolve_initial_references("NameService");
 		NamingContextExt ncRef= NamingContextExtHelper.narrow(objRef);
-		LoginImplementacion h= new LoginImplementacion(); 
+		
+		String name = "inicio_sesion";
+		NameComponent path[]= ncRef.to_name(name);
+		ncRef.rebind(path,href); 
 
 		// ESPERAMOS INVOCACIONES DE LOS CLIENTES
 		System.out.println("Servidor listo y a la espera de conexiones ...\n");
